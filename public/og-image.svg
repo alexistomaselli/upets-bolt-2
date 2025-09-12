@@ -1,0 +1,30 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#4F46E5"/>
+  <rect x="50" y="50" width="1100" height="530" rx="20" fill="white"/>
+  
+  <!-- Logo placeholder -->
+  <circle cx="200" cy="200" r="100" fill="#4F46E5"/>
+  <path d="M160 200 L240 200 M200 160 L200 240" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  
+  <!-- Title -->
+  <text x="350" y="180" font-family="Arial, sans-serif" font-weight="bold" font-size="60" fill="#111827">AFPets</text>
+  <text x="350" y="250" font-family="Arial, sans-serif" font-weight="normal" font-size="40" fill="#4B5563">Bienestar y Seguridad para tu Mascota</text>
+  
+  <!-- Features -->
+  <g transform="translate(150, 350)">
+    <!-- QR Icon -->
+    <rect x="0" y="0" width="80" height="80" rx="10" fill="#4F46E5"/>
+    <rect x="20" y="20" width="40" height="40" rx="5" fill="white"/>
+    <text x="100" y="45" font-family="Arial, sans-serif" font-weight="bold" font-size="30" fill="#111827">QR Inteligente</text>
+  </g>
+  
+  <g transform="translate(550, 350)">
+    <!-- WhatsApp Icon -->
+    <circle cx="40" cy="40" r="40" fill="#25D366"/>
+    <path d="M55 40 C55 48 48 55 40 55 C32 55 25 48 25 40 C25 32 32 25 40 25 C48 25 55 32 55 40" stroke="white" stroke-width="3" fill="none"/>
+    <text x="100" y="45" font-family="Arial, sans-serif" font-weight="bold" font-size="30" fill="#111827">Veterinario IA</text>
+  </g>
+  
+  <!-- URL -->
+  <text x="600" y="550" font-family="Arial, sans-serif" font-weight="normal" font-size="30" fill="#6B7280" text-anchor="middle">afpets.com</text>
+</svg>
