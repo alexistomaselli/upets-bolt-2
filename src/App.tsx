@@ -18,6 +18,7 @@ import { AccountPage } from './pages/AccountPage';
 import { WhatsAppPage } from './pages/WhatsAppPage';
 import { RoadmapPage } from './pages/RoadmapPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { CustomerDashboard } from './pages/CustomerDashboard';
 
 const queryClient = new QueryClient();
 
@@ -127,7 +128,7 @@ const AppContent = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsM
           } />
           <Route path="/mi-cuenta" element={
             <ProtectedRoute>
-              <AccountPage />
+              <CustomerDashboard />
             </ProtectedRoute>
           } />
           
