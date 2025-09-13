@@ -49,20 +49,18 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
-            {/* Cart */}
-            {user && (
-              <Link
-                to="/carrito"
-                className="relative p-2 text-gray-700 hover:text-green-600 transition-colors"
-              >
-                <ShoppingCart className="h-6 w-6" />
-                {cart.item_count > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cart.item_count}
-                  </span>
-                )}
-              </Link>
-            )}
+            {/* Cart - Always visible */}
+            <Link
+              to="/carrito"
+              className="relative p-2 text-gray-700 hover:text-green-600 transition-colors"
+            >
+              <ShoppingCart className="h-6 w-6" />
+              {cart.item_count > 0 && (
+                <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cart.item_count}
+                </span>
+              )}
+            </Link>
 
             {/* User Menu */}
             {user ? (
@@ -151,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
             ))}
             
             {/* Mobile Auth Links */}
-            {!user && (
+            {!user ? (
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <Link
                   to="/login"
@@ -167,6 +165,50 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
                 >
                   Registrarse
                 </Link>
+              </div>
+            ) : (
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <Link
+                  to="/carrito"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50 transition-colors"
+                >
+                  <ShoppingCart className="h-5 w-5 mr-3" />
+                  Carrito
+                  {cart.item_count > 0 && (
+                    <span className="ml-2 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cart.item_count}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  to="/mi-cuenta"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50 transition-colors"
+                >
+                  <User className="h-5 w-5 mr-3" />
+                  Mi Cuenta
+                </Link>
+                {(isSuperAdmin() || isCompanyAdmin() || isBranchAdmin()) && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50 transition-colors"
+                  >
+                    <Settings className="h-5 w-5 mr-3" />
+                    Administración
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center w-full px-3 py-2 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Cerrar Sesión
+                </button>
               </div>
             )}
           </div>
