@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImage from '../assets/images/afpets-4.webp';
 
 interface AFPetsLogoProps {
   className?: string;
@@ -11,13 +12,9 @@ export const AFPetsLogo: React.FC<AFPetsLogoProps> = ({
 }) => {
   return (
     <img 
-      src="/afpets-6.webp"
+      src={logoImage}
       alt={alt}
       className={className}
-      onError={(e) => {
-        console.error('Error loading logo:', e);
-        console.log('Attempted to load:', '/afpets-6.webp');
-      }}
     />
   );
 };
