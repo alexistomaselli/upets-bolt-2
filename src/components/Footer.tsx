@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
-import logoHorizontal from '../assets/images/afpets-logo.webp';
+import { AFPetsLogo } from './AFPetsLogo';
 
 export const Footer: React.FC = () => {
   return (
@@ -11,7 +11,7 @@ export const Footer: React.FC = () => {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center">
-              <img src={logoHorizontal} alt="AFPets" className="h-10" />
+              <AFPetsLogo className="h-10 w-auto" />
             </Link>
             <p className="text-gray-400 leading-relaxed">
               Tecnología para mantener seguras a las mascotas que amás. 
