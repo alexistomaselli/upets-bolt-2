@@ -1,5 +1,5 @@
 import React from 'react';
-import logoImage from '../assets/images/afpets-4.webp';
+import logoImage from '../assets/images/afpets-6.webp';
 
 interface AFPetsLogoProps {
   className?: string;
