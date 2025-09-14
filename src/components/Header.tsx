@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <AFPetsLogo className="h-12 w-auto" />
+            <AFPetsLogo className="h-9 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
