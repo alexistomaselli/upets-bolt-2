@@ -11,7 +11,7 @@ export const AFPetsLogo: React.FC<AFPetsLogoProps> = ({
 }) => {
   return (
     <img 
-      src="/src/assets/images/afpets-4.webp"
+      src="/afpets-logo.webp"
       alt={alt}
       className={className}
     />
