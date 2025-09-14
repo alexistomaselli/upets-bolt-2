@@ -11,7 +11,15 @@ export const Footer: React.FC = () => {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center">
-              <AFPetsLogo className="h-10 w-auto" />
+              <img 
+                src="/src/assets/images/afpets-logo.webp"
+                alt="AFPets Logo"
+                className="h-10 w-auto"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.insertAdjacentHTML('afterend', '<span class="h-10 font-bold text-green-600 text-2xl">AFPets</span>');
+                }}
+              />
             </Link>
             <p className="text-gray-400 leading-relaxed">
               Tecnología para mantener seguras a las mascotas que amás. 
