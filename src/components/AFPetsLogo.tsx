@@ -6,7 +6,7 @@ interface AFPetsLogoProps {
 }
 
 export const AFPetsLogo: React.FC<AFPetsLogoProps> = ({ 
-  className = "h-12 w-auto", 
+  className = "h-9 w-auto", 
   alt = "AFPets Logo" 
 }) => {
   return (
