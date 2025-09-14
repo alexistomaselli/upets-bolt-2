@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
 
             {/* User Menu */}
             {user ? (
-              <div className="relative group">
+              <div className="hidden md:block relative group">
                 <button className="flex items-center space-x-2 p-2 text-gray-700 hover:text-green-600 transition-colors">
                   <User className="h-6 w-6" />
                   <span className="hidden md:block text-sm font-medium">
@@ -106,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="hidden md:flex items-center space-x-2">
                 <Link
                   to="/login"
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-green-600 transition-colors"
@@ -168,19 +168,6 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
               </div>
             ) : (
               <div className="border-t border-gray-200 pt-4 mt-4">
-                <Link
-                  to="/carrito"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-green-600 hover:bg-gray-50 transition-colors"
-                >
-                  <ShoppingCart className="h-5 w-5 mr-3" />
-                  Carrito
-                  {cart.item_count > 0 && (
-                    <span className="ml-2 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {cart.item_count}
-                    </span>
-                  )}
-                </Link>
                 <Link
                   to="/mi-cuenta"
                   onClick={() => setIsMenuOpen(false)}
