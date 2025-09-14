@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
-import logoHorizontal from '../assets/images/logo-horizontal.webp';
+import logoHorizontal from '../assets/images/afpets-logo.webp';
 
 export const Footer: React.FC = () => {
   return (

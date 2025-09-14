@@ -1,5 +1,5 @@
 import React from 'react';
-import logoHorizontal from '../assets/images/logo-horizontal.webp';
+import logoHorizontal from '../assets/images/afpets-logo.webp';
 
 interface AFPetsLogoProps {
   className?: string;
