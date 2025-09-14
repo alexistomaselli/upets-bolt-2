@@ -31,15 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => 
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img 
-              src="/src/assets/images/afpets-logo.webp"
-              alt="AFPets Logo"
-              className="h-8 w-auto"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.insertAdjacentHTML('afterend', '<span class="h-8 font-bold text-green-600 text-xl">AFPets</span>');
-              }}
-            />
+            <AFPetsLogo className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
