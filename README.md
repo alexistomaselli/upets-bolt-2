@@ -46,11 +46,20 @@ npm run build
 
 ```
 src/
-├── components/        # Componentes reutilizables
+├── components/        # Componentes organizados por módulos
+│   ├── ui/           # Componentes de interfaz reutilizables
+│   ├── layout/       # Componentes de layout (Header, Footer, etc.)
+│   ├── auth/         # Componentes de autenticación
+│   ├── companies/    # Módulo de gestión de comercios
+│   ├── qr/           # Módulo de gestión de QRs
+│   ├── pets/         # Módulo de gestión de mascotas
+│   ├── admin/        # Componentes de administración
+│   ├── dashboard/    # Componentes de dashboard
+│   └── forms/        # Componentes de formularios reutilizables
 ├── pages/            # Páginas principales
+├── hooks/            # Custom React hooks organizados por módulo
 ├── services/         # Integración con APIs
 ├── types/            # Definiciones TypeScript
-├── hooks/            # Custom React hooks
 └── utils/            # Utilidades y helpers
 ```
 

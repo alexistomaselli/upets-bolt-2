@@ -1,7 +1,7 @@
 import React from 'react';
 import { Users, Shield, Building, BarChart3, Settings, Store } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { CompanyManagement } from '../../components/admin/CompanyManagement';
+import { CompanyManagement } from '../../components/companies/CompanyManagement';
 
 export const AdminDashboard: React.FC = () => {
   const { user, profile, roles, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuth();
