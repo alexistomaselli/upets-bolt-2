@@ -1,0 +1,12 @@
+{
+  "name": "afpets-admin-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scripts de administración para AFPets",
+  "scripts": {
+    "assign-superadmin": "node assign-superadmin.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4"
+  }
+}
