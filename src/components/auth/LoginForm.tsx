@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export const LoginForm: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { signIn } = useAuth();
+  const { signIn, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,10 +20,27 @@ export const LoginForm: React.FC = () => {
     setError(null);
 
     try {
-      const { error } = await signIn(email, password);
+      const { data, error } = await signIn(email, password);
       
       if (error) {
         setError(error.message);
+      } else if (data?.user) {
+        // Esperar un momento para que se carguen los roles
+        setTimeout(() => {
+          // Obtener la URL de destino o usar una por defecto según el rol
+          const from = location.state?.from?.pathname;
+          
+          if (from) {
+            navigate(from, { replace: true });
+          } else {
+            // Redirigir según el rol del usuario
+            if (isSuperAdmin() || isCompanyAdmin() || isBranchAdmin()) {
+              navigate('/admin', { replace: true });
+            } else {
+              navigate('/mi-cuenta', { replace: true });
+            }
+          }
+        }, 1000);
       }
     } catch (err) {
       setError('Error inesperado al iniciar sesión');

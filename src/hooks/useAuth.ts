@@ -90,6 +90,8 @@ export const useAuth = () => {
 
   const loadUserData = async (user: User) => {
     try {
+      console.log('🔄 Cargando datos del usuario:', user.email);
+      
       // Cargar perfil del usuario
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
@@ -107,6 +109,8 @@ export const useAuth = () => {
 
       if (rolesError) {
         console.error('Error loading roles:', rolesError);
+      } else {
+        console.log('✅ Roles cargados:', roles);
       }
 
       setAuthState(prev => ({

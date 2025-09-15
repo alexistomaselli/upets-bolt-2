@@ -18,6 +18,7 @@ import { WhatsAppPage } from './pages/WhatsAppPage';
 import { RoadmapPage } from './pages/RoadmapPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { CustomerDashboard } from './pages/CustomerDashboard';
+import { DebugAuth } from './components/DebugAuth';
 
 const queryClient = new QueryClient();
 
@@ -53,12 +54,20 @@ function App() {
 // Componente interno que tiene acceso al contexto del Router
 const AppContent = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuOpen: (isOpen: boolean) => void }) => {
   const location = useLocation();
-  const { user, loading } = useAuth();
+  const { user, loading, roles } = useAuth();
   const path = location.pathname;
   
   // Rutas que no necesitan header/footer
   const authRoutes = ['/login', '/registro'];
   const isAuthRoute = authRoutes.includes(path);
+  
+  // Debug de roles
+  React.useEffect(() => {
+    if (user && roles.length > 0) {
+      console.log('👤 Usuario autenticado:', user.email);
+      console.log('🎭 Roles del usuario:', roles);
+    }
+  }, [user, roles]);
   
   // Configurar metadatos específicos según la ruta
   let title = 'AFPets - Bienestar y Seguridad para tu Mascota | QR para Mascotas';
@@ -102,6 +111,9 @@ const AppContent = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsM
       {!isAuthRoute && <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />}
       
       <main className={!isAuthRoute ? "pt-16" : ""}>
+        {/* Debug component - remover en producción */}
+        <DebugAuth />
+        
         <Routes>
           {/* Rutas públicas */}
           <Route path="/" element={<LandingPage />} />
