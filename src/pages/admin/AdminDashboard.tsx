@@ -1,9 +1,11 @@
 import React from 'react';
-import { Users, Shield, Building, BarChart3, Settings } from 'lucide-react';
+import { Users, Shield, Building, BarChart3, Settings, Store } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { CompanyManagement } from '../../components/admin/CompanyManagement';
 
 export const AdminDashboard: React.FC = () => {
   const { user, profile, roles, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuth();
+  const [activeSection, setActiveSection] = React.useState('overview');
 
   const stats = [
     { name: 'Usuarios Totales', value: '1,234', icon: Users, color: 'text-blue-600' },
@@ -14,8 +16,8 @@ export const AdminDashboard: React.FC = () => {
 
   const quickActions = [
     { name: 'Gestionar Usuarios', icon: Users, href: '/admin/users', color: 'bg-blue-600' },
+    { name: 'Comercios', icon: Store, action: 'companies', color: 'bg-green-600' },
     { name: 'Configurar Roles', icon: Shield, href: '/admin/roles', color: 'bg-green-600' },
-    { name: 'Ver Comercios', icon: Building, href: '/admin/companies', color: 'bg-purple-600' },
     { name: 'Configuración', icon: Settings, href: '/admin/settings', color: 'bg-orange-600' },
   ];
 
@@ -51,6 +53,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      {activeSection === 'companies' && (
+        <CompanyManagement />
+      )}
+
+      {activeSection === 'overview' && (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -74,10 +81,10 @@ export const AdminDashboard: React.FC = () => {
           <h2 className="text-xl font-bold text-gray-900 mb-6">Acciones Rápidas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action) => (
-              <a
+              <button
                 key={action.name}
-                href={action.href}
-                className="flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 group"
+                onClick={() => action.action ? setActiveSection(action.action) : window.location.href = action.href}
+                className="flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 group text-left"
               >
                 <div className={`p-3 rounded-lg ${action.color} text-white group-hover:scale-110 transition-transform duration-200`}>
                   <action.icon className="h-6 w-6" />
@@ -87,7 +94,7 @@ export const AdminDashboard: React.FC = () => {
                     {action.name}
                   </p>
                 </div>
-              </a>
+              </button>
             ))}
           </div>
         </div>
@@ -154,6 +161,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };
