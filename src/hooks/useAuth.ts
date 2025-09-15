@@ -104,22 +104,56 @@ export const useAuth = () => {
       }
 
       // Cargar roles del usuario
-      const { data: roles, error: rolesError } = await supabase
+      console.log('🔄 Cargando roles para usuario ID:', user.id);
+      
+      // Primero intentar con la función RPC
+      let roles = null;
+      const { data: rolesRPC, error: rolesRPCError } = await supabase
         .rpc('get_user_roles', { user_uuid: user.id });
-
-      if (rolesError) {
-        console.error('Error loading roles:', rolesError);
+      
+      if (rolesRPCError) {
+        console.error('❌ Error con RPC get_user_roles:', rolesRPCError);
+        
+        // Fallback: consulta directa a las tablas
+        console.log('🔄 Intentando consulta directa...');
+        const { data: rolesDirect, error: rolesDirectError } = await supabase
+          .from('user_roles')
+          .select(`
+            roles!inner(name, level)
+          `)
+          .eq('user_id', user.id)
+          .eq('is_active', true);
+        
+        if (rolesDirectError) {
+          console.error('❌ Error con consulta directa:', rolesDirectError);
+          roles = [];
+        } else {
+          console.log('✅ Roles obtenidos con consulta directa:', rolesDirect);
+          roles = rolesDirect?.map(ur => ({
+            role_name: ur.roles.name,
+            role_level: ur.roles.level
+          })) || [];
+        }
       } else {
-        console.log('✅ Roles cargados:', roles);
+        console.log('✅ Roles obtenidos con RPC:', rolesRPC);
+        roles = rolesRPC || [];
       }
+
+      console.log('🎭 Roles finales asignados:', roles);
 
       setAuthState(prev => ({
         ...prev,
         profile: profile || null,
-        roles: roles || [],
+        roles: roles,
       }));
     } catch (error) {
       console.error('Error loading user data:', error);
+      // En caso de error, al menos marcar como no loading
+      setAuthState(prev => ({
+        ...prev,
+        profile: null,
+        roles: [],
+      }));
     }
   };
 

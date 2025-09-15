@@ -25,22 +25,16 @@ export const LoginForm: React.FC = () => {
       if (error) {
         setError(error.message);
       } else if (data?.user) {
-        // Esperar un momento para que se carguen los roles
-        setTimeout(() => {
-          // Obtener la URL de destino o usar una por defecto según el rol
-          const from = location.state?.from?.pathname;
-          
-          if (from) {
-            navigate(from, { replace: true });
-          } else {
-            // Redirigir según el rol del usuario
-            if (isSuperAdmin() || isCompanyAdmin() || isBranchAdmin()) {
-              navigate('/admin', { replace: true });
-            } else {
-              navigate('/mi-cuenta', { replace: true });
-            }
-          }
-        }, 1000);
+        console.log('✅ Login exitoso, redirigiendo...');
+        // Redirigir inmediatamente, los roles se cargarán después
+        const from = location.state?.from?.pathname;
+        
+        if (from) {
+          navigate(from, { replace: true });
+        } else {
+          // Por defecto ir a mi-cuenta, el sistema redirigirá a admin si es necesario
+          navigate('/mi-cuenta', { replace: true });
+        }
       }
     } catch (err) {
       setError('Error inesperado al iniciar sesión');

@@ -66,8 +66,18 @@ const AppContent = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsM
     if (user && roles.length > 0) {
       console.log('👤 Usuario autenticado:', user.email);
       console.log('🎭 Roles del usuario:', roles);
+      
+      // Auto-redirigir a admin si es admin y está en mi-cuenta
+      const isAdmin = roles.some(role => 
+        ['super_admin', 'company_admin', 'branch_admin'].includes(role.role_name)
+      );
+      
+      if (isAdmin && location.pathname === '/mi-cuenta') {
+        console.log('🔄 Redirigiendo admin a /admin');
+        window.location.href = '/admin';
+      }
     }
-  }, [user, roles]);
+  }, [user, roles, location.pathname]);
   
   // Configurar metadatos específicos según la ruta
   let title = 'AFPets - Bienestar y Seguridad para tu Mascota | QR para Mascotas';
