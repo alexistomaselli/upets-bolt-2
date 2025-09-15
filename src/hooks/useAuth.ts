@@ -106,37 +106,47 @@ export const useAuth = () => {
       // Cargar roles del usuario
       console.log('🔄 Cargando roles para usuario ID:', user.id);
       
-      // Primero intentar con la función RPC
-      let roles = null;
+      let roles: UserRole[] = [];
+      
+      // Intentar con la función RPC primero
+      console.log('🔄 Intentando con función RPC get_user_roles...');
       const { data: rolesRPC, error: rolesRPCError } = await supabase
         .rpc('get_user_roles', { user_uuid: user.id });
       
       if (rolesRPCError) {
-        console.error('❌ Error con RPC get_user_roles:', rolesRPCError);
+        console.error('❌ Error con RPC get_user_roles:', rolesRPCError.message);
         
         // Fallback: consulta directa a las tablas
-        console.log('🔄 Intentando consulta directa...');
+        console.log('🔄 Fallback: consulta directa a user_roles...');
         const { data: rolesDirect, error: rolesDirectError } = await supabase
           .from('user_roles')
           .select(`
-            roles!inner(name, level)
+            role_id,
+            roles!inner(
+              name,
+              level
+            )
           `)
           .eq('user_id', user.id)
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .order('roles.level', { ascending: false });
         
         if (rolesDirectError) {
-          console.error('❌ Error con consulta directa:', rolesDirectError);
+          console.error('❌ Error con consulta directa:', rolesDirectError.message);
           roles = [];
         } else {
-          console.log('✅ Roles obtenidos con consulta directa:', rolesDirect);
-          roles = rolesDirect?.map(ur => ({
-            role_name: ur.roles.name,
-            role_level: ur.roles.level
+          console.log('✅ Datos de consulta directa:', rolesDirect);
+          roles = (rolesDirect || []).map(ur => ({
+            role_name: (ur as any).roles.name,
+            role_level: (ur as any).roles.level
           })) || [];
         }
       } else {
-        console.log('✅ Roles obtenidos con RPC:', rolesRPC);
-        roles = rolesRPC || [];
+        console.log('✅ Datos de RPC:', rolesRPC);
+        roles = (rolesRPC || []).map(r => ({
+          role_name: r.role_name,
+          role_level: r.role_level
+        }));
       }
 
       console.log('🎭 Roles finales asignados:', roles);
@@ -144,11 +154,20 @@ export const useAuth = () => {
       setAuthState(prev => ({
         ...prev,
         profile: profile || null,
-        roles: roles,
+        roles: roles || [],
       }));
+      
+      // Si es admin, mostrar mensaje de debug
+      const isAdmin = roles.some(role => 
+        ['super_admin', 'company_admin', 'branch_admin'].includes(role.role_name)
+      );
+      
+      if (isAdmin) {
+        console.log('🔑 Usuario es administrador, roles:', roles.map(r => r.role_name));
+      }
+      
     } catch (error) {
       console.error('Error loading user data:', error);
-      // En caso de error, al menos marcar como no loading
       setAuthState(prev => ({
         ...prev,
         profile: null,
