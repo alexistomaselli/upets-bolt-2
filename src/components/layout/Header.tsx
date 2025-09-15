@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ShoppingCart, User, LogOut, Settings } from 'lucide-react';
 import { AFPetsLogo } from '../AFPetsLogo';
-import { useCart } from '../hooks/useCart';
-import { useAuth } from '../hooks/useAuth';
+import { useCart } from '../../hooks/useCart';
+import { useAuth } from '../../hooks/useAuth';
 
 interface HeaderProps {
   isMenuOpen: boolean;
