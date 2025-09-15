@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
-import { AFPetsLogo } from './AFPetsLogo';
+import { AFPetsLogo } from '../AFPetsLogo';
 
 export const Footer: React.FC = () => {
   return (
