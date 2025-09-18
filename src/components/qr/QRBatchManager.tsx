@@ -14,7 +14,6 @@ export const QRBatchManager: React.FC<QRBatchManagerProps> = ({ branchId }) => {
   const [batchData, setBatchData] = useState<CreateQRBatchData>({
     quantity: 50,
     qr_type: 'basic',
-    price_per_unit: 2500,
     branch_id: branchId,
     notes: '',
   });
@@ -30,7 +29,6 @@ export const QRBatchManager: React.FC<QRBatchManagerProps> = ({ branchId }) => {
       setBatchData({
         quantity: 50,
         qr_type: 'basic',
-        price_per_unit: 2500,
         branch_id: branchId,
         notes: '',
       });
@@ -132,15 +130,7 @@ export const QRBatchManager: React.FC<QRBatchManagerProps> = ({ branchId }) => {
                   <span className="font-medium capitalize">{batch.qr_type}</span>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Precio unitario:</span>
-                  <span className="font-medium">${batch.price_per_unit}</span>
-                </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Total:</span>
-                  <span className="font-bold text-green-600">${batch.total_amount}</span>
-                </div>
 
                 {batch.branch && (
                   <div className="flex items-center text-sm text-gray-600">
@@ -206,17 +196,7 @@ export const QRBatchManager: React.FC<QRBatchManagerProps> = ({ branchId }) => {
             </div>
           </div>
 
-          <Input
-            label="Precio por Unidad"
-            type="number"
-            min="0"
-            step="0.01"
-            value={batchData.price_per_unit}
-            onChange={(e) => setBatchData(prev => ({ 
-              ...prev, 
-              price_per_unit: parseFloat(e.target.value) || 0 
-            }))}
-          />
+
 
           {!branchId && branches && (
             <div>
@@ -257,14 +237,7 @@ export const QRBatchManager: React.FC<QRBatchManagerProps> = ({ branchId }) => {
             />
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between text-lg font-semibold">
-              <span>Total del Lote:</span>
-              <span className="text-green-600">
-                ${(batchData.quantity * batchData.price_per_unit).toFixed(2)}
-              </span>
-            </div>
-          </div>
+
 
           <div className="flex items-center justify-end space-x-4">
             <Button 

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuth } from './hooks/useAuth';
+import { useAuthContext } from './hooks/useAuthContext';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { SEOStructuredData } from './components/SEOStructuredData';
 import { SocialMetaTags } from './components/SocialMetaTags';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { LoginForm, RegisterForm } from './components/auth';
+import { SuperAdminLogin } from './components/auth/SuperAdminLogin';
+import { SuperAdminRedirect, SmartRedirect } from './components/auth/RoleBasedRedirect';
 import { LandingPage } from './pages/LandingPage';
 import { StorePage } from './pages/StorePage';
 import { ProductPage } from './pages/ProductPage';
@@ -17,8 +19,13 @@ import { AccountPage } from './pages/AccountPage';
 import { WhatsAppPage } from './pages/WhatsAppPage';
 import { RoadmapPage } from './pages/RoadmapPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { SuperAdminDashboard } from './pages/admin/SuperAdminDashboard';
+import { SystemQRPage } from './pages/admin/SystemQRPage';
 import { CustomerDashboard } from './pages/CustomerDashboard';
 import { DebugAuth } from './components/DebugAuth';
+import AccessDenied from './pages/AccessDenied';
+import { AuthProvider } from './context/AuthContext';
+import { SupabaseConfigProvider } from './context/SupabaseConfigContext';
 
 const queryClient = new QueryClient();
 
@@ -45,7 +52,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <AppContent isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+        <SupabaseConfigProvider>
+          <AuthProvider>
+            <AppContent isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+          </AuthProvider>
+        </SupabaseConfigProvider>
       </Router>
     </QueryClientProvider>
   );
@@ -54,30 +65,22 @@ function App() {
 // Componente interno que tiene acceso al contexto del Router
 const AppContent = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuOpen: (isOpen: boolean) => void }) => {
   const location = useLocation();
-  const { user, loading, roles } = useAuth();
+  const { user, loading, roles } = useAuthContext(); // Cambiado de useAuth a useAuthContext para resolver el error
   const path = location.pathname;
   
   // Rutas que no necesitan header/footer
   const authRoutes = ['/login', '/registro'];
   const isAuthRoute = authRoutes.includes(path);
   
-  // Debug de roles
+  // Debug de roles - comentado para evitar refrescos constantes
+  /*
   React.useEffect(() => {
     if (user && roles.length > 0) {
       console.log('👤 Usuario autenticado:', user.email);
       console.log('🎭 Roles del usuario:', roles);
-      
-      // Auto-redirigir a admin si es admin y está en mi-cuenta
-      const isAdmin = roles.some(role => 
-        ['super_admin', 'company_admin', 'branch_admin'].includes(role.role_name)
-      );
-      
-      if (isAdmin && location.pathname === '/mi-cuenta') {
-        console.log('🔄 Redirigiendo admin a /admin');
-        window.location.href = '/admin';
-      }
     }
-  }, [user, roles, location.pathname]);
+  }, [user, roles]);
+  */
   
   // Configurar metadatos específicos según la ruta
   let title = 'AFPets - Bienestar y Seguridad para tu Mascota | QR para Mascotas';
@@ -121,8 +124,8 @@ const AppContent = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsM
       {!isAuthRoute && <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />}
       
       <main className={!isAuthRoute ? "pt-16" : ""}>
-        {/* Debug component - remover en producción */}
-        <DebugAuth />
+        {/* Debug component solo visible en desarrollo */}
+        {import.meta.env.DEV && <DebugAuth />}
         
         <Routes>
           {/* Rutas públicas */}
@@ -154,11 +157,24 @@ const AppContent = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsM
           } />
           
           {/* Rutas de administración */}
-          <Route path="/admin" element={
-            <ProtectedRoute minimumLevel={10}>
-              <AdminDashboard />
+          <Route path="/admin" element={<SuperAdminRedirect />} />
+          <Route path="/admin/login" element={<SuperAdminLogin />} />
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute minimumLevel={100}>
+              <SuperAdminDashboard />
             </ProtectedRoute>
           } />
+          <Route path="/admin/sistema-qr" element={
+            <ProtectedRoute minimumLevel={100}>
+              <SystemQRPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* Ruta de redirección inteligente */}
+          <Route path="/redirect" element={<SmartRedirect />} />
+          
+          {/* Ruta de acceso denegado */}
+          <Route path="/access-denied" element={<AccessDenied />} />
         </Routes>
       </main>
       

@@ -18,6 +18,8 @@ export { LoadingSpinner } from './LoadingSpinner';
 export type { LoadingSpinnerProps } from './LoadingSpinner';
 
 export { EmptyState } from './EmptyState';
+
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 export type { EmptyStateProps } from './EmptyState';
 
 export { ConfirmDialog } from './ConfirmDialog';

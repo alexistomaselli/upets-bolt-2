@@ -149,11 +149,6 @@ export const QRCard: React.FC<QRCardProps> = ({
           <span className="text-sm text-gray-600">
             {qrCode.scan_count} escaneos
           </span>
-          {qrCode.purchase_price && (
-            <span className="text-sm font-medium text-green-600">
-              ${qrCode.purchase_price}
-            </span>
-          )}
         </div>
       </div>
     </Card>

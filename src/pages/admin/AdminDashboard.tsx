@@ -1,11 +1,11 @@
 import React from 'react';
 import { Users, Shield, Building, BarChart3, Settings, Store, QrCode } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthContext } from '../../hooks/useAuthContext';
 import { CompanyManagement } from '../../components/companies/CompanyManagement';
 import { QRBatchManager } from '../../components/qr/QRBatchManager';
 
 export const AdminDashboard: React.FC = () => {
-  const { user, profile, roles, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuth();
+  const { user, profile, roles, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuthContext();
   const [activeSection, setActiveSection] = React.useState('overview');
 
   const stats = [
@@ -91,7 +91,7 @@ export const AdminDashboard: React.FC = () => {
             {quickActions.map((action) => (
               <button
                 key={action.name}
-                onClick={() => action.action ? setActiveSection(action.action) : window.location.href = action.href}
+                onClick={() => action.action ? setActiveSection(action.action) : action.href ? window.location.href = action.href : null}
                 className="flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 group text-left"
               >
                 <div className={`p-3 rounded-lg ${action.color} text-white group-hover:scale-110 transition-transform duration-200`}>

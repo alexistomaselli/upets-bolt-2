@@ -1,48 +1,65 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
-import { QRCode, QRScan, QRBatch, QRStats, QRFilters, CreateQRBatchData, UpdateQRData } from '../../types/qr';
+import { QRCode, QRScan, QRBatch, QRStats, QRFilters, CreateQRBatchData, UpdateQRData, QRType, CreateMultipleQRsData } from '../../types/qr';
 
 export const useQRCodes = (filters?: QRFilters) => {
   return useQuery({
     queryKey: ['qr-codes', filters],
     queryFn: async () => {
-      let query = supabase
-        .from('qr_codes')
-        .select(`
-          *,
-          pet:pets(*),
-          owner:user_profiles(*),
-          branch:branches(*)
-        `)
-        .order('created_at', { ascending: false });
+      try {
+        // Verificar si hay una sesión activa antes de hacer la consulta
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.warn('No hay sesión activa al intentar obtener códigos QR');
+          return [];
+        }
 
-      if (filters?.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters?.qr_type) {
-        query = query.eq('qr_type', filters.qr_type);
-      }
-      if (filters?.owner_id) {
-        query = query.eq('owner_id', filters.owner_id);
-      }
-      if (filters?.branch_id) {
-        query = query.eq('sold_by_branch_id', filters.branch_id);
-      }
-      if (filters?.search) {
-        query = query.or(`code.ilike.%${filters.search}%`);
-      }
-      if (filters?.date_from) {
-        query = query.gte('created_at', filters.date_from);
-      }
-      if (filters?.date_to) {
-        query = query.lte('created_at', filters.date_to);
-      }
+        let query = supabase
+          .from('qr_codes')
+          .select(`
+            *,
+            pet:pets(*),
+            owner:user_profiles(*),
+            branch:branches(*)
+          `)
+          .order('created_at', { ascending: false });
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data as QRCode[];
+        if (filters?.status) {
+          query = query.eq('status', filters.status);
+        }
+        if (filters?.qr_type) {
+          query = query.eq('qr_type', filters.qr_type);
+        }
+        if (filters?.owner_id) {
+          query = query.eq('owner_id', filters.owner_id);
+        }
+        if (filters?.branch_id) {
+          query = query.eq('sold_by_branch_id', filters.branch_id);
+        }
+        if (filters?.search) {
+          query = query.or(`code.ilike.%${filters.search}%`);
+        }
+        if (filters?.date_from) {
+          query = query.gte('created_at', filters.date_from);
+        }
+        if (filters?.date_to) {
+          query = query.lte('created_at', filters.date_to);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+          console.error('Error al obtener códigos QR:', error);
+          throw error;
+        }
+        return data as QRCode[];
+      } catch (error) {
+        console.error('Error en useQRCodes:', error);
+        return [];
+      }
     },
+    retry: 1,
+    retryDelay: 1000,
   });
 };
 
@@ -102,8 +119,6 @@ export const useCreateQRBatch = () => {
           batch_number: `BATCH-${Date.now()}`,
           quantity: batchData.quantity,
           qr_type: batchData.qr_type,
-          price_per_unit: batchData.price_per_unit,
-          total_amount: batchData.quantity * batchData.price_per_unit,
           branch_id: batchData.branch_id,
           notes: batchData.notes,
           status: 'pending'
@@ -120,7 +135,6 @@ export const useCreateQRBatch = () => {
         qrCodes.push({
           code,
           qr_type: batchData.qr_type,
-          purchase_price: batchData.price_per_unit,
           sold_by_branch_id: batchData.branch_id,
           status: 'inactive',
           metadata: { batch_id: batch.id }
@@ -170,6 +184,39 @@ export const useUpdateQRCode = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
       queryClient.invalidateQueries({ queryKey: ['qr-code', data.id] });
+    },
+  });
+};
+
+export const useCreateMultipleQRs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateMultipleQRsData) => {
+      // Generar códigos QR
+      const qrCodes = [];
+      for (let i = 0; i < data.quantity; i++) {
+        const code = `QR${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        qrCodes.push({
+          code,
+          qr_type: data.qr_type,
+          sold_by_branch_id: data.branch_id,
+          status: 'inactive',
+          metadata: { notes: data.notes || '' }
+        });
+      }
+
+      const { data: createdQRs, error: qrError } = await supabase
+        .from('qr_codes')
+        .insert(qrCodes)
+        .select();
+
+      if (qrError) throw qrError;
+
+      return { qr_codes: createdQRs };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
     },
   });
 };
@@ -291,22 +338,38 @@ export const useQRBatches = (branchId?: string) => {
   return useQuery({
     queryKey: ['qr-batches', branchId],
     queryFn: async () => {
-      let query = supabase
-        .from('qr_batches')
-        .select(`
-          *,
-          branch:branches(*),
-          created_by_user:user_profiles(*)
-        `)
-        .order('created_at', { ascending: false });
+      try {
+        // Verificar si hay una sesión activa antes de hacer la consulta
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.warn('No hay sesión activa al intentar obtener lotes de QR');
+          return [];
+        }
 
-      if (branchId) {
-        query = query.eq('branch_id', branchId);
+        let query = supabase
+          .from('qr_batches')
+          .select(`
+            *,
+            branch:branches(*)
+          `)
+          .order('created_at', { ascending: false });
+
+        if (branchId) {
+          query = query.eq('branch_id', branchId);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+          console.error('Error al obtener lotes de QR:', error);
+          throw error;
+        }
+        return data as QRBatch[];
+      } catch (error) {
+        console.error('Error en useQRBatches:', error);
+        return [];
       }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data as QRBatch[];
     },
+    retry: 1,
+    retryDelay: 1000,
   });
 };

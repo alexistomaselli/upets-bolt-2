@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Menu, X, ShoppingCart, User, LogOut, Settings } from 'lucide-react';
 import { AFPetsLogo } from '../AFPetsLogo';
 import { useCart } from '../../hooks/useCart';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
 interface HeaderProps {
   isMenuOpen: boolean;
@@ -12,7 +12,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ isMenuOpen, setIsMenuOpen }) => {
   const { cart } = useCart();
-  const { user, profile, signOut, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuth();
+  const { user, profile, signOut, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuthContext();
 
   const navigation = [
     { name: 'Inicio', href: '/' },

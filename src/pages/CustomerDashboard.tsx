@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Heart, QrCode, Plus, Settings, Bell, MapPin, Phone, Calendar } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 export const CustomerDashboard: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile } = useAuthContext();
   const [activeTab, setActiveTab] = useState('pets');
 
   const tabs = [

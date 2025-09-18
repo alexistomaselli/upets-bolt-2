@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredPermission,
   minimumLevel,
 }) => {
-  const { user, loading, hasRole, hasMinimumRole, hasPermission } = useAuth();
+  const { user, loading, hasRole, hasMinimumRole, hasPermission } = useAuthContext();
   const location = useLocation();
 
   // Mostrar loading mientras se verifica la autenticación

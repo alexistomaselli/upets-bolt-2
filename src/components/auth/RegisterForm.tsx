@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Phone, UserPlus } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
 export const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +18,7 @@ export const RegisterForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const { signUp } = useAuth();
+  const { signUp } = useAuthContext();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({

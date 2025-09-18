@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthContext } from '../../hooks/useAuthContext';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { signIn, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuth();
+  const { signIn, isSuperAdmin, isCompanyAdmin, isBranchAdmin } = useAuthContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

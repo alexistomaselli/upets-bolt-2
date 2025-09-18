@@ -1,3 +1,21 @@
+import { Branch } from './company';
+import { UserProfile } from '../hooks/useAuth';
+
+// Definición temporal de Pet hasta que se cree el archivo correspondiente
+export interface Pet {
+  id: string;
+  owner_id: string;
+  name: string;
+  species: string;
+  breed: string;
+  color: string;
+  birth_date: string;
+  medical_conditions: string | null;
+  photo_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface QRCode {
   id: string;
   code: string;
@@ -11,7 +29,6 @@ export interface QRCode {
   last_scan_date: string | null;
   last_scan_location: string | null;
   purchase_date: string;
-  purchase_price: number | null;
   sold_by_branch_id: string | null;
   metadata: Record<string, any>;
   created_at: string;
@@ -38,13 +55,20 @@ export interface QRScan {
   qr_code?: QRCode;
 }
 
+export type QRType = 'basic' | 'premium' | 'institutional';
+
+export interface CreateMultipleQRsData {
+  quantity: number;
+  qr_type: QRType;
+  branch_id?: string;
+  notes?: string;
+}
+
 export interface QRBatch {
   id: string;
   batch_number: string;
   quantity: number;
-  qr_type: 'basic' | 'premium' | 'institutional';
-  price_per_unit: number;
-  total_amount: number;
+  qr_type: QRType;
   branch_id: string | null;
   created_by: string;
   status: 'pending' | 'generated' | 'delivered' | 'cancelled';
@@ -69,7 +93,6 @@ export interface QRStats {
   recent_scans: QRScan[];
 }
 
-export type QRType = 'basic' | 'premium' | 'institutional';
 export type QRStatus = 'inactive' | 'active' | 'lost' | 'found' | 'expired';
 export type QRBatchStatus = 'pending' | 'generated' | 'delivered' | 'cancelled';
 
@@ -77,7 +100,6 @@ export type QRBatchStatus = 'pending' | 'generated' | 'delivered' | 'cancelled';
 export interface CreateQRBatchData {
   quantity: number;
   qr_type: QRType;
-  price_per_unit: number;
   branch_id?: string;
   notes?: string;
 }

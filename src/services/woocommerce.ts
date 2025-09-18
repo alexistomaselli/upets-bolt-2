@@ -27,7 +27,17 @@ const wcApi = axios.create({
   },
 });
 
-// Interceptor para autenticación
+// Variable para controlar peticiones duplicadas
+const pendingRequests = new Map<string, Promise<any>>();
+
+// Extender el tipo de configuración de Axios para incluir nuestra propiedad personalizada
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    _requestKey?: string;
+  }
+}
+
+// Interceptor para autenticación y control de peticiones duplicadas
 wcApi.interceptors.request.use((config) => {
   if (WC_CONSUMER_KEY && WC_CONSUMER_SECRET) {
     // Usar autenticación básica con las claves de WooCommerce
@@ -42,28 +52,70 @@ wcApi.interceptors.request.use((config) => {
     };
   }
   
-  console.log('🔄 Realizando petición a:', config.url);
+  // Crear una clave única para esta petición
+  const requestKey = `${config.method}:${config.url}:${JSON.stringify(config.params || {})}`;
+  
+  // Verificar si hay una petición idéntica pendiente
+  if (pendingRequests.has(requestKey)) {
+    console.log('⚠️ Petición duplicada detectada, usando promesa existente:', config.url);
+    return Promise.reject({ 
+      duplicateRequest: true, 
+      pendingPromise: pendingRequests.get(requestKey) 
+    });
+  }
+  
+  // Registrar esta petición como pendiente
+  const requestPromise = new Promise<any>((resolve) => {
+    config._requestKey = requestKey;
+    resolve(config);
+  });
+  pendingRequests.set(requestKey, requestPromise);
+  
+  // Reducir logs para evitar saturar la consola
+  if (import.meta.env.DEV) {
+    console.log('🔄 Realizando petición a:', config.url);
+  }
   return config;
 });
 
 // Interceptor para respuestas
 wcApi.interceptors.response.use(
   (response) => {
-    console.log('✅ Respuesta exitosa de WooCommerce:', response.config.url);
+    // Limpiar la petición pendiente
+    if (response.config._requestKey) {
+      pendingRequests.delete(response.config._requestKey);
+    }
+    // Reducir logs para evitar saturar la consola
+    if (import.meta.env.DEV) {
+      console.log('✅ Respuesta exitosa de WooCommerce:', response.config.url);
+    }
     return response;
   },
   (error) => {
-    console.error('❌ Error en petición WooCommerce:', {
-      url: error.config?.url,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message
-    });
+    // Manejar peticiones duplicadas
+    if (error.duplicateRequest && error.pendingPromise) {
+      // Reutilizar la promesa existente sin generar logs adicionales
+      return error.pendingPromise;
+    }
     
-    // Si es un error de CORS, mostrar mensaje específico
-    if (error.message.includes('Network Error') || error.code === 'ERR_NETWORK') {
-      console.error('🚫 Error de CORS o red. Verificar configuración del servidor WordPress.');
+    // Limpiar la petición pendiente en caso de error
+    if (error.config?._requestKey) {
+      pendingRequests.delete(error.config._requestKey);
+    }
+    
+    // Solo mostrar errores detallados en desarrollo
+    if (import.meta.env.DEV) {
+      console.error('❌ Error en petición WooCommerce:', {
+        url: error.config?.url,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      });
+      
+      // Si es un error de CORS, mostrar mensaje específico
+      if (error.message?.includes('Network Error') || error.code === 'ERR_NETWORK') {
+        console.error('🚫 Error de CORS o red. Verificar configuración del servidor WordPress.');
+      }
     }
     
     return Promise.reject(error);
@@ -93,7 +145,10 @@ export class WooCommerceAPI {
     search?: string;
   }): Promise<Product[]> {
     try {
-      console.log('📦 Obteniendo productos con parámetros:', params);
+      // Reducir logs para evitar saturar la consola
+      if (import.meta.env.DEV) {
+        console.log('📦 Obteniendo productos con parámetros:', params);
+      }
       
       // Preparar parámetros de la consulta
       const queryParams: any = {
@@ -117,11 +172,15 @@ export class WooCommerceAPI {
       const response = await wcApi.get('/products', { params: queryParams });
       const products = response.data;
       
-      console.log(`✅ ${products.length} productos obtenidos de WooCommerce`);
+      // Reducir logs para evitar saturar la consola
+      if (import.meta.env.DEV) {
+        console.log(`✅ ${products.length} productos obtenidos de WooCommerce`);
+      }
       return products;
     } catch (error) {
-      console.error('❌ Error obteniendo productos:', error);
-      console.log('🔄 Usando productos placeholder...');
+      if (import.meta.env.DEV) {
+        console.error('❌ Error obteniendo productos:', error);
+      }
       return [];
     }
   }
