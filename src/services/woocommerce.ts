@@ -2,18 +2,25 @@ import axios from 'axios';
 import { Product, ProductCategory, Order, Cart } from '../types/product';
 
 // Configuración de variables de entorno
-const WC_API_BASE_URL = import.meta.env.VITE_WC_API_BASE_URL;
-const WC_CONSUMER_KEY = import.meta.env.VITE_WC_CONSUMER_KEY;
-const WC_CONSUMER_SECRET = import.meta.env.VITE_WC_CONSUMER_SECRET;
+const WC_API_BASE_URL = import.meta.env.VITE_WC_API_BASE_URL || 'https://shop.afpets.com/wp-json/wc/v3';
+const WC_CONSUMER_KEY = import.meta.env.VITE_WC_CONSUMER_KEY || 'ck_72d9441104adb4f5fbfe9ae3cb2da5847b2bf5a3';
+const WC_CONSUMER_SECRET = import.meta.env.VITE_WC_CONSUMER_SECRET || 'cs_1380cb1668ca1ca58ae9aa9fac6de571f1092e70';
 const WP_AUTH_METHOD = import.meta.env.VITE_WP_AUTH_METHOD || 'wc_keys';
 
 // Validar configuración
 if (!WC_API_BASE_URL || !WC_CONSUMER_KEY || !WC_CONSUMER_SECRET) {
-  console.warn('⚠️ Variables de entorno de WooCommerce no configuradas completamente');
+  console.warn('⚠️ Variables de entorno de WooCommerce no configuradas completamente. Usando valores por defecto.');
   console.warn('Verificar:', {
     WC_API_BASE_URL: !!WC_API_BASE_URL,
     WC_CONSUMER_KEY: !!WC_CONSUMER_KEY,
     WC_CONSUMER_SECRET: !!WC_CONSUMER_SECRET
+  });
+} else {
+  console.log('✅ Configuración de WooCommerce cargada:', {
+    baseUrl: WC_API_BASE_URL,
+    hasKey: !!WC_CONSUMER_KEY,
+    hasSecret: !!WC_CONSUMER_SECRET,
+    authMethod: WP_AUTH_METHOD
   });
 }
 
@@ -30,26 +37,23 @@ const wcApi = axios.create({
 // Interceptor para autenticación
 wcApi.interceptors.request.use((config) => {
   if (WC_CONSUMER_KEY && WC_CONSUMER_SECRET) {
-    // Usar autenticación básica con las claves de WooCommerce
-    const credentials = btoa(`${WC_CONSUMER_KEY}:${WC_CONSUMER_SECRET}`);
-    config.headers.Authorization = `Basic ${credentials}`;
-    
-    // También agregar como parámetros de query (método alternativo)
+    // Usar parámetros de query para autenticación (método recomendado para WooCommerce)
     config.params = {
       ...config.params,
       consumer_key: WC_CONSUMER_KEY,
       consumer_secret: WC_CONSUMER_SECRET,
     };
+    
+    console.log('🔑 Autenticación WooCommerce configurada para:', config.url);
   }
   
-  console.log('🔄 Realizando petición a:', config.url);
   return config;
 });
 
 // Interceptor para respuestas
 wcApi.interceptors.response.use(
   (response) => {
-    console.log('✅ Respuesta exitosa de WooCommerce:', response.config.url);
+    console.log('✅ Respuesta exitosa de WooCommerce:', response.config.url, `(${response.data.length || 1} items)`);
     return response;
   },
   (error) => {
@@ -61,9 +65,13 @@ wcApi.interceptors.response.use(
       message: error.message
     });
     
-    // Si es un error de CORS, mostrar mensaje específico
-    if (error.message.includes('Network Error') || error.code === 'ERR_NETWORK') {
-      console.error('🚫 Error de CORS o red. Verificar configuración del servidor WordPress.');
+    // Mensajes de error más específicos
+    if (error.response?.status === 401) {
+      console.error('🔐 Error de autenticación: Verificar consumer key y secret');
+    } else if (error.response?.status === 403) {
+      console.error('🚫 Error de permisos: El usuario no tiene acceso a la API');
+    } else if (error.message.includes('Network Error') || error.code === 'ERR_NETWORK') {
+      console.error('🌐 Error de red: Verificar CORS y conectividad con shop.afpets.com');
     }
     
     return Promise.reject(error);
@@ -74,12 +82,12 @@ export class WooCommerceAPI {
   // Método para probar la conexión
   static async testConnection(): Promise<boolean> {
     try {
-      console.log('🔍 Probando conexión con WooCommerce...');
+      console.log('🔍 Probando conexión con WooCommerce en:', WC_API_BASE_URL);
       const response = await wcApi.get('/products', { params: { per_page: 1 } });
-      console.log('✅ Conexión con WooCommerce exitosa');
+      console.log('✅ Conexión con WooCommerce exitosa. Productos disponibles:', response.data.length);
       return true;
     } catch (error) {
-      console.error('❌ Error de conexión con WooCommerce:', error);
+      console.error('❌ Error de conexión con WooCommerce. Usando productos placeholder.');
       return false;
     }
   }
@@ -111,7 +119,6 @@ export class WooCommerceAPI {
         if (category) {
           queryParams.category = category.id;
         }
-        delete queryParams.category; // Remover el slug
       }
 
       const response = await wcApi.get('/products', { params: queryParams });
@@ -120,8 +127,7 @@ export class WooCommerceAPI {
       console.log(`✅ ${products.length} productos obtenidos de WooCommerce`);
       return products;
     } catch (error) {
-      console.error('❌ Error obteniendo productos:', error);
-      console.log('🔄 Usando productos placeholder...');
+      console.warn('⚠️ No se pudieron obtener productos de WooCommerce. Usando productos placeholder.');
       return [];
     }
   }
@@ -165,7 +171,7 @@ export class WooCommerceAPI {
   // Categorías
   static async getCategories(): Promise<ProductCategory[]> {
     try {
-      console.log('📂 Obteniendo categorías...');
+      console.log('📂 Obteniendo categorías de WooCommerce...');
       const response = await wcApi.get('/products/categories', {
         params: {
           per_page: 100,
@@ -177,7 +183,7 @@ export class WooCommerceAPI {
       console.log(`✅ ${categories.length} categorías obtenidas`);
       return categories;
     } catch (error) {
-      console.error('❌ Error obteniendo categorías:', error);
+      console.warn('⚠️ No se pudieron obtener categorías de WooCommerce. Usando categorías placeholder.');
       return [];
     }
   }
@@ -198,12 +204,15 @@ export class WooCommerceAPI {
   // Órdenes
   static async createOrder(orderData: any): Promise<Order | null> {
     try {
-      console.log('🛒 Creando orden...', orderData);
+      console.log('🛒 Creando orden en WooCommerce...', { 
+        items: orderData.line_items?.length || 0,
+        total: orderData.total || 'N/A'
+      });
       const response = await wcApi.post('/orders', orderData);
-      console.log('✅ Orden creada exitosamente:', response.data.id);
+      console.log('✅ Orden creada exitosamente en WooCommerce. ID:', response.data.id);
       return response.data;
     } catch (error) {
-      console.error('❌ Error creando orden:', error);
+      console.error('❌ Error creando orden en WooCommerce:', error);
       throw error;
     }
   }
@@ -268,6 +277,13 @@ export class WooCommerceAPI {
 }
 
 // Probar conexión al cargar el módulo
-if (typeof window !== 'undefined') {
-  WooCommerceAPI.testConnection();
+if (typeof window !== 'undefined' && WC_API_BASE_URL && WC_CONSUMER_KEY) {
+  console.log('🚀 Iniciando prueba de conexión con WooCommerce...');
+  WooCommerceAPI.testConnection().then(success => {
+    if (success) {
+      console.log('🎉 WooCommerce conectado exitosamente a shop.afpets.com');
+    } else {
+      console.log('⚠️ WooCommerce no disponible. La tienda funcionará con productos placeholder.');
+    }
+  });
 }
